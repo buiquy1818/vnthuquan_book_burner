@@ -1,0 +1,2 @@
+ebooklib == 0.15
+requests == 2.7.0
