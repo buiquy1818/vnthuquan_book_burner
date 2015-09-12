@@ -20,8 +20,18 @@ Hiện tại phần mềm mới ở dạng beta.
 
 
 ## Các gạch đầu dòng cần/sẽ giải quyết:
-- Chuẩn hóa code
+- Chuẩn hóa code, bổ sung comment, chuyển comment sang tiếng V
 - Khả năng cho nhiều định dạng. Ban đầu tối thiểu 2 định dạng, về sau sẽ cập nhật khi có thêm bug
 - Khả năng chạy portable GUI trên nền Window để ứng dụng phổ cập hơn
 
+
+## Chạy môi trường commandline(Ubuntu)
+### Cài đặt các thư viện phụ thuộc
+'''
+pip install -r requirements.txt
+'''
+### Chạy script chính của chương trình
+'''
+python main.py http://vnthuquan.net/truyen/truyen.aspx?tid=2qtqv3m3237n3nmnqn2n31n343tq83a3q3m3237nvn
+'''
 

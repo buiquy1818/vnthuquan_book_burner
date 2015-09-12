@@ -33,3 +33,16 @@ class Book:
     def add_chapter(self, chapter):
         self.chapters.append(chapter)
 
+    @staticmethod
+    def general_validate(image, title, author, chapter_params):
+        if image and title and author and isinstance(chapter_params, list):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def chapter_validate(chapter):
+        if isinstance(chapter, Chapter) and chapter.title and chapter.content:
+            return True
+        else:
+            return False

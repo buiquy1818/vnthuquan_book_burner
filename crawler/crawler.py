@@ -12,10 +12,10 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 from config.logging_cfg import *
-from config import constant
+from config import system_cfg
 from model.book import Book
 from model.chapter import Chapter
-
+from library import html_tool
 
 class Crawler:
     book = None
@@ -35,13 +35,13 @@ class Crawler:
         if self.root_url:
             thumb, title, author, chapter_params = self.get_general_info()
 
-            if self.general_validate(thumb, title, author, chapter_params):
+            if Book.general_validate(thumb, title, author, chapter_params):
                 self.book.set_thumb(thumb)
                 self.book.set_title(title)
                 self.book.set_author(author)
                 for chapter_param in chapter_params:
                     chapter = self.get_chapter(chapter_param)
-                    if not self.chapter_validate(chapter):
+                    if not Book.chapter_validate(chapter):
                         log.error("Chapter: %s is fail crawled", chapter)
                         return False
                     self.book.add_chapter(chapter)
@@ -94,8 +94,8 @@ class Crawler:
         chapter_title = None
         chapter_content = None
 
-        url = constant.vnthuquan_book_url
-        chapter_param = self.decode_param_to_dict(chapter_param)
+        url = system_cfg.CHAPTER_URL
+        chapter_param = html_tool.decode_param_to_dict(chapter_param)
         # site_rs = requests.post(url=url, params=chapter_param, verify=False)
         site_rs = self.try_request(url, 'POST', data=chapter_param)
         soup = BeautifulSoup(site_rs.content, 'html.parser')
@@ -146,41 +146,15 @@ class Crawler:
         log.info("Crawler chapter: %s", chapter_title)
         return chapter
 
-    @staticmethod
-    def decode_param_to_dict(params_string):
-        if isinstance(params_string, str) or isinstance(params_string, unicode):
-            params_list_of_str = params_string.split('&')
-            params_list = {}
-            for param_str in params_list_of_str:
-                param_name, param_value = param_str.split('=')
-                params_list[param_name] = param_value
-            return params_list
-        else:
-            return None
-
-    @staticmethod
-    def general_validate(image, title, author, chapter_params):
-        if image and title and author and isinstance(chapter_params, list):
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def chapter_validate(chapter):
-        if isinstance(chapter, Chapter) and chapter.title and chapter.content:
-            return True
-        else:
-            return False
-
     def try_request(self, url, post_type='GET', try_time=0, params=None, data=None):
         try:
 
             if post_type == 'GET':
-                headers = {'User-Agent': 'Mozilla/5.0'}
+                headers = {'User-Agent': system_cfg.USER_AGENT}
                 site_rs = requests.get(url=url, params=params, data=data, headers=headers, verify=False)
             else:
 
-                headers = {'User-Agent': 'Mozilla/5.0'}
+                headers = {'User-Agent': system_cfg.USER_AGENT}
                 session = requests.Session()
                 session.get(url, headers=headers)
                 cookies = requests.utils.cookiejar_from_dict(requests.utils.dict_from_cookiejar(session.cookies))
@@ -194,9 +168,9 @@ class Crawler:
             return site_rs
         except requests.exceptions.ConnectionError:
             try_time += 1
-            if try_time >= 10:
+            if try_time >= system_cfg.MAX_RETRY_TIME:
                 return None
             else:
-                time.sleep(5)
+                time.sleep(system_cfg)
                 log.warn("Retry url %s %r time" % (url, try_time))
                 return self.try_request(url, post_type, try_time, params, data)
