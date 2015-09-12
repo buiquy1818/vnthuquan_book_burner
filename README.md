@@ -27,11 +27,11 @@ Hiện tại phần mềm mới ở dạng beta.
 
 ## Chạy môi trường commandline(Ubuntu)
 ### Cài đặt các thư viện phụ thuộc
-'''
+```
 pip install -r requirements.txt
-'''
+```
 ### Chạy script chính của chương trình
-'''
+```
 python main.py http://vnthuquan.net/truyen/truyen.aspx?tid=2qtqv3m3237n3nmnqn2n31n343tq83a3q3m3237nvn
-'''
+```
 
