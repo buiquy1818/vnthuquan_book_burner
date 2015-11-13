@@ -24,11 +24,11 @@ class Burner:
             epub_book.set_identifier('id123456')
 
             # get cover image file
-            rs = requests.get(self.book.thumb)
-            image_obj = Image.open(cStringIO.StringIO(rs.content))
-            epub_book.set_cover('cover.' + image_obj.format, rs.content)
+            if self.book.thumb:
+                rs = requests.get(self.book.thumb)
+                image_obj = Image.open(cStringIO.StringIO(rs.content))
+                epub_book.set_cover('cover.' + image_obj.format, rs.content)
 
-            # epub_book.set_cover(file_name=self.book.thumb,content='', create_page=True)
             chapter_order = 1
             epub_book.add_item(epub.EpubNcx())
             epub_book.add_item(epub.EpubNav())

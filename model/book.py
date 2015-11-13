@@ -34,8 +34,8 @@ class Book:
         self.chapters.append(chapter)
 
     @staticmethod
-    def general_validate(image, title, author, chapter_params):
-        if image and title and author and isinstance(chapter_params, list):
+    def general_validate(title, author, chapter_params):
+        if title and author and isinstance(chapter_params, list):
             return True
         else:
             return False

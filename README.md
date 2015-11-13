@@ -20,8 +20,8 @@ Hiện tại phần mềm mới ở dạng beta.
 
 
 ## Các gạch đầu dòng cần/sẽ giải quyết:
-- Chuẩn hóa code, bổ sung comment, chuyển comment sang tiếng V
-- Khả năng cho nhiều định dạng. Ban đầu tối thiểu 2 định dạng, về sau sẽ cập nhật khi có thêm bug
+- Chuẩn hóa code, bổ sung comment, chuyển comment sang tiếng Việt
+- Khả năng cho nhiều định dạng chapter. Ban đầu tối thiểu 2 định dạng sách, về sau sẽ cập nhật khi có thêm bug
 - Khả năng chạy portable GUI trên nền Window để ứng dụng phổ cập hơn
 
 
