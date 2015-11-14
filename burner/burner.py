@@ -9,6 +9,8 @@ import requests
 import cStringIO
 
 from config.logging_cfg import *
+from config.system_cfg import VNTQ_COPYRIGHT_STRING
+
 
 class Burner:
     book = None
@@ -20,10 +22,10 @@ class Burner:
     def burning(self):
         epub_book = epub.EpubBook()
         if self.book and isinstance(self.book, Book):
-            epub_book.set_title(self.book.title)
+            epub_book.set_title(self.book.title + " " + VNTQ_COPYRIGHT_STRING)
             epub_book.set_language('vn')
             epub_book.add_author(self.book.author)
-            epub_book.set_identifier('id123456')
+            epub_book.set_identifier(self.book.title + self.book.author)
 
             # get cover image file
             if self.book.thumb:
