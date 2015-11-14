@@ -5,8 +5,10 @@ from model.book import Book
 from datetime import datetime
 from PIL import Image
 import requests
+
 import cStringIO
 
+from config.logging_cfg import *
 
 class Burner:
     book = None
@@ -25,9 +27,12 @@ class Burner:
 
             # get cover image file
             if self.book.thumb:
-                rs = requests.get(self.book.thumb)
-                image_obj = Image.open(cStringIO.StringIO(rs.content))
-                epub_book.set_cover('cover.' + image_obj.format, rs.content)
+                try:
+                    rs = requests.get(self.book.thumb)
+                    image_obj = Image.open(cStringIO.StringIO(rs.content))
+                    epub_book.set_cover('cover.' + image_obj.format, rs.content)
+                except requests.exceptions.ConnectionError:
+                    log.error("Can't download cover image from %s", self.book.thumb)
 
             chapter_order = 1
             epub_book.add_item(epub.EpubNcx())
