@@ -133,9 +133,14 @@ class Crawler:
                     for chutieude_tag in chutieude_tags:
                         if chutieude_tag.string and chutieude_tag.string.strip():
                             chutieude_list.append(chutieude_tag.string.strip())
-                    if len(chutieude_list) == 2:
+                    if len(chutieude_list) >= 2:
                         book_author = chutieude_list[0]
-                        chapter_title = chutieude_list[1]
+                        del chutieude_list[0]
+                        for chutieude in chutieude_list:
+                            if chapter_title:
+                                chapter_title = chapter_title + chutieude + " "
+                            else:
+                                chapter_title = chutieude + " "
                     elif len(chutieude_list) == 1:
                         chapter_title = chutieude_list[0]
                 else:
