@@ -78,12 +78,13 @@ class Crawler:
 
         if chapter_params:
             first_chapter = self.get_chapter(chapter_params[0])
-            if first_chapter.book_thumb:
-                book_thumb = first_chapter.book_thumb
-            if first_chapter.book_title:
-                book_title = first_chapter.book_title
-            if first_chapter.book_author:
-                book_author = first_chapter.book_author
+            if first_chapter:
+                if first_chapter.book_thumb:
+                    book_thumb = first_chapter.book_thumb
+                if first_chapter.book_title:
+                    book_title = first_chapter.book_title
+                if first_chapter.book_author:
+                    book_author = first_chapter.book_author
 
         return book_thumb, book_title, book_author, chapter_params
 
@@ -100,84 +101,91 @@ class Crawler:
         url = system_cfg.CHAPTER_URL
         chapter_param = html_tool.decode_param_to_dict(chapter_param)
         site_rs = self.try_request(url, 'POST', data=chapter_param)
+        if site_rs:
+            content_list = site_rs.content.split('--!!tach_noi_dung!!--', 3)
+            if len(content_list) >= 3:
 
-        content_list = site_rs.content.split('--!!tach_noi_dung!!--', 3)
-        if len(content_list) >= 3:
+                #####################
+                # get book_thumb from css
+                #####################
+                css_soup = BeautifulSoup(content_list[0], 'html.parser')
+                style_tag = css_soup.find('style')
+                if style_tag:
+                    thumb_re = re.search('background:url\((http://(\w|\W)*)\)', style_tag.string)
+                    if thumb_re:
+                        book_thumb = thumb_re.group(1)
 
-            #####################
-            # get book_thumb from css
-            #####################
-            css_soup = BeautifulSoup(content_list[0], 'html.parser')
-            style_tag = css_soup.find('style')
-            if style_tag:
-                thumb_re = re.search('background:url\((http://(\w|\W)*)\)', style_tag.string)
-                if thumb_re:
-                    book_thumb = thumb_re.group(1)
+                #####################
+                # get book title
+                # get book author
+                # get chapter title
+                #####################
+                desc_soup = BeautifulSoup(content_list[1], 'html.parser')
 
-            #####################
-            # get book title
-            # get book author
-            # get chapter title
-            #####################
-            desc_soup = BeautifulSoup(content_list[1], 'html.parser')
+                book_title_tag = desc_soup.find('span', class_='chuto40')
+                if book_title_tag:
+                    book_title = book_title_tag.string.strip()
 
-            book_title_tag = desc_soup.find('span', class_='chuto40')
-            if book_title_tag:
-                book_title = book_title_tag.string.strip()
+                tuade_tag = desc_soup.find('div', class_='tuade')
+                if tuade_tag:
+                    chutieude_tags = desc_soup.find_all('span', class_='chutieude')
+                    chutieude_list = []
+                    for chutieude_tag in chutieude_tags:
+                        if chutieude_tag.string and chutieude_tag.string.strip():
+                            chutieude_list.append(chutieude_tag.string.strip())
+                    if len(chutieude_list) == 2:
+                        book_author = chutieude_list[0]
+                        chapter_title = chutieude_list[1]
+                    elif len(chutieude_list) == 1:
+                        chapter_title = chutieude_list[0]
+                else:
 
-            tuade_tag = desc_soup.find('div', class_='tuade')
-            if tuade_tag:
-                chutieude_tags = desc_soup.find_all('span', class_='chutieude')
-                chutieude_list = []
-                for chutieude_tag in chutieude_tags:
-                    if chutieude_tag.string and chutieude_tag.string.strip():
-                        chutieude_list.append(chutieude_tag.string.strip())
-                if len(chutieude_list) == 2:
-                    book_author = chutieude_list[0]
-                    chapter_title = chutieude_list[1]
-                elif len(chutieude_list) == 1:
-                    chapter_title = chutieude_list[0]
-            else:
+                    tac_gia_tag = desc_soup.find('span', class_='tacgiaphai')
+                    if tac_gia_tag:
+                        book_author = tac_gia_tag.string.strip()
 
-                tac_gia_tag = desc_soup.find('span', class_='tacgiaphai')
-                if tac_gia_tag:
-                    book_author = tac_gia_tag.string.strip()
+                    chutieude_tags = desc_soup.find_all('span', class_='chutieude')
+                    chutieude_list = []
+                    for chutieude_tag in chutieude_tags:
+                        if chutieude_tag.text and chutieude_tag.text.strip():
+                            chutieude_list.append(chutieude_tag.text.strip())
+                    if len(chutieude_list) == 2:
+                        chapter_title = chutieude_list[0] + ": " + chutieude_list[1]
+                    elif len(chutieude_list) == 1:
+                        chapter_title = chutieude_list[0]
 
-                chutieude_tags = desc_soup.find_all('span', class_='chutieude')
-                chutieude_list = []
-                for chutieude_tag in chutieude_tags:
-                    if chutieude_tag.text and chutieude_tag.text.strip():
-                        chutieude_list.append(chutieude_tag.text.strip())
-                if len(chutieude_list) == 2:
-                    chapter_title = chutieude_list[0] + ": " + chutieude_list[1]
-                elif len(chutieude_list) == 1:
-                    chapter_title = chutieude_list[0]
+                #####################
+                # get chapter content( add chapter title to chapter content)
+                #####################
 
-            #####################
-            # get chapter content( add chapter title to chapter content)
-            #####################
+                chapter_content = content_list[2]
 
-            chapter_content = content_list[2]
+                # older :'<div id="chuhoain"(\w|\W)*cotich_(\w)(\w|\W)*?<br(\w|\W)*?>((\w|\W)*)'
+                # 2015.11.14: '<div id="chuhoain"(\w|\W)*?cotich_(\w)(\w|\W)*?<div style=\'height:15px;\'></div>((\w|\W)*)'
 
-            first_character_re = re.search(
-                '<div id="chuhoain"(\w|\W)*cotich_(\w)(\w|\W)*?<br(\w|\W)*?>((\w|\W)*)', chapter_content)
-            if first_character_re:
-                chapter_content = first_character_re.group(2) + first_character_re.group(5)
+                first_character_re = re.search(
+                    '<div id="chuhoain"(\w|\W)*?cotich_(\w)(\w|\W)*?<div style=\'height:15px;\'></div>((\w|\W)*)'
+                    , chapter_content)
+                if first_character_re:
+                    chapter_content = first_character_re.group(2) + first_character_re.group(4)
 
-            # Add chapter title to chapter_content
-            if chapter_title and chapter_content:
-                chapter_content = '<div><h2 align=\'center\'>' + chapter_title + '</h2></div>' + chapter_content
+                # Add chapter title to chapter_content
+                if chapter_title and chapter_content:
+                    chapter_content = '<div><h2 align=\'center\'>' + chapter_title + '</h2></div>' + chapter_content
 
-        chapter = Chapter(title=chapter_title, content=chapter_content)
-        if book_title:
-            chapter.set_book_title(book_title)
-        if book_author:
-            chapter.set_book_author(book_author)
-        if book_thumb:
-            chapter.set_book_thumb(book_thumb)
-        log.info("Crawler chapter: %s", chapter_title)
+            chapter = Chapter(title=chapter_title, content=chapter_content)
+            if book_title:
+                chapter.set_book_title(book_title)
+            if book_author:
+                chapter.set_book_author(book_author)
+            if book_thumb:
+                chapter.set_book_thumb(book_thumb)
+            log.info("Crawler chapter: %s", chapter_title)
 
-        return chapter
+            return chapter
+        else:
+            log.error("Can't get content of this chapter")
+            return None
 
     def try_request(self, url, post_type='GET', try_time=0, params=None, data=None):
         try:
