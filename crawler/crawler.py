@@ -120,12 +120,25 @@ class Crawler:
             # get chapter title
             #####################
             desc_soup = BeautifulSoup(content_list[1], 'html.parser')
-            tieude0anh_tag = desc_soup.find('div', class_='tieude0anh')
 
-            if tieude0anh_tag:
-                book_title_tag = desc_soup.find('span', class_='chuto40')
-                if book_title_tag:
-                    book_title = book_title_tag.string.strip()
+            book_title_tag = desc_soup.find('span', class_='chuto40')
+            if book_title_tag:
+                book_title = book_title_tag.string.strip()
+
+            tuade_tag = desc_soup.find('div', class_='tuade')
+            if tuade_tag:
+                chutieude_tags = desc_soup.find_all('span', class_='chutieude')
+                chutieude_list = []
+                for chutieude_tag in chutieude_tags:
+                    if chutieude_tag.string and chutieude_tag.string.strip():
+                        chutieude_list.append(chutieude_tag.string.strip())
+                if len(chutieude_list) == 2:
+                    book_author = chutieude_list[0]
+                    chapter_title = chutieude_list[1]
+                elif len(chutieude_list) == 1:
+                    chapter_title = chutieude_list[0]
+            else:
+
                 tac_gia_tag = desc_soup.find('span', class_='tacgiaphai')
                 if tac_gia_tag:
                     book_author = tac_gia_tag.string.strip()
@@ -137,22 +150,6 @@ class Crawler:
                         chutieude_list.append(chutieude_tag.text.strip())
                 if len(chutieude_list) == 2:
                     chapter_title = chutieude_list[0] + ": " + chutieude_list[1]
-                elif len(chutieude_list) == 1:
-                    chapter_title = chutieude_list[0]
-
-            else:
-                book_title_tag = desc_soup.find('span', class_='chuto40')
-                if book_title_tag:
-                    book_title = book_title_tag.string.strip()
-
-                chutieude_tags = desc_soup.find_all('span', class_='chutieude')
-                chutieude_list = []
-                for chutieude_tag in chutieude_tags:
-                    if chutieude_tag.string and chutieude_tag.string.strip():
-                        chutieude_list.append(chutieude_tag.string.strip())
-                if len(chutieude_list) == 2:
-                    book_author = chutieude_list[0]
-                    chapter_title = chutieude_list[1]
                 elif len(chutieude_list) == 1:
                     chapter_title = chutieude_list[0]
 
