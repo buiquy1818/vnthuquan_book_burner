@@ -22,7 +22,7 @@ class Burner:
     def burning(self):
         epub_book = epub.EpubBook()
         if self.book and isinstance(self.book, Book):
-            epub_book.set_title(self.book.title + " " + VNTQ_COPYRIGHT_STRING)
+            epub_book.set_title(self.book.title + " (" + VNTQ_COPYRIGHT_STRING + ") ")
             epub_book.set_language('vn')
             epub_book.add_author(self.book.author)
             epub_book.set_identifier(self.book.title + self.book.author)
