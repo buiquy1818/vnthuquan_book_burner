@@ -15,13 +15,19 @@ args = parser.parse_args()
 if args.url:
     crawler = Crawler(args.url)
     crawler_rs = crawler.crawling()
-    log.info("Crawler successfully")
-    burner = Burner(crawler.book)
-    burner_rs = burner.burning()
-    log.info("Burner successfully")
-    print burner_rs
+    if crawler_rs:
+        log.info("Crawler successfully")
+        burner = Burner(crawler.book)
+        burner_rs = burner.burning()
+        if burner_rs:
+            log.info("Burner successfully")
+            print burner_rs
+        else:
+            log.error("Can't burning")
+    else:
+        log.error("Can't crawling")
 else:
     log.warning("No address to download")
-# burner = Burner()
+
 
 
