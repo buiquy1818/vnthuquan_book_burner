@@ -9,7 +9,7 @@ import requests
 import cStringIO
 
 from config.logging_cfg import *
-from config.system_cfg import VNTQ_COPYRIGHT_STRING
+from config.system_cfg import VNTQ_COPYRIGHT_STRING, UPPER_CHAR_URL, UPPER_CHAR_PATH
 
 
 class Burner:
@@ -30,9 +30,10 @@ class Burner:
             # get cover image file
             if self.book.thumb:
                 try:
-                    rs = requests.get(self.book.thumb)
+                    rs = requests.get(self.book.thumb, stream=True)
                     image_obj = Image.open(cStringIO.StringIO(rs.content))
                     epub_book.set_cover('cover.' + image_obj.format, rs.content)
+                    log.info("Book cover is created")
                 except requests.exceptions.ConnectionError:
                     log.error("Can't download cover image from %s", self.book.thumb)
 
@@ -51,11 +52,23 @@ class Burner:
                 epub_book.spine.append(epub_chapter)
                 chapter_order += 1
 
+                # add upper character
+                if chapter.upper_character:
+                    try:
+                        rs = requests.get(UPPER_CHAR_URL + chapter.upper_character, stream=True)
+
+                        upper_char_img = epub.EpubItem(uid=chapter.upper_character,
+                                                       file_name=UPPER_CHAR_PATH + chapter.upper_character,
+                                                       content=rs.content)
+                        # add upper character to book
+                        epub_book.add_item(upper_char_img)
+                        log.info("Add upper character img: " + chapter.upper_character)
+                    except requests.exceptions.ConnectionError:
+                        log.error("Can't download upper char image from %s", chapter.upper_character)
+
             # define CSS style
             style = 'BODY {color: white;}'
             nav_css = epub.EpubItem(uid="style_nav", file_name="style/nav.css", media_type="text/css", content=style)
-
-            # add CSS file
             epub_book.add_item(nav_css)
 
             epub.write_epub(

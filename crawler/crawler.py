@@ -97,6 +97,7 @@ class Crawler:
         book_author = None
         chapter_title = None
         chapter_content = None
+        upper_char = None
 
         url = system_cfg.CHAPTER_URL
         chapter_param = html_tool.decode_param_to_dict(chapter_param)
@@ -163,16 +164,21 @@ class Crawler:
                 # get chapter content( add chapter title to chapter content)
                 #####################
 
-                chapter_content = content_list[2]
+                content_soup = BeautifulSoup(content_list[2], 'html.parser')
+                if content_soup:
+                    chuhoain_tag = content_soup.find(id='chuhoain')
+                    if chuhoain_tag:
+                        chuinhoa_img = chuhoain_tag.img
+                        if chuinhoa_img:
+                            chuhoain_src = chuinhoa_img['src']
+                            if (isinstance(chuhoain_src, str) or isinstance(chuhoain_src,
+                                                                            unicode)) and chuhoain_src.find(
+                                    system_cfg.UPPER_CHAR_URL) != -1:
+                                chuhoain = chuhoain_src.replace(system_cfg.UPPER_CHAR_URL, '')
+                                chuinhoa_img['src'] = system_cfg.UPPER_CHAR_PATH + chuhoain
+                                upper_char = chuhoain
 
-                # older :'<div id="chuhoain"(\w|\W)*cotich_(\w)(\w|\W)*?<br(\w|\W)*?>((\w|\W)*)'
-                # 2015.11.14: '<div id="chuhoain"(\w|\W)*?cotich_(\w)(\w|\W)*?<div style=\'height:15px;\'></div>((\w|\W)*)'
-
-                first_character_re = re.search(
-                    '<div id="chuhoain"(\w|\W)*?cotich_(\w)(\w|\W)*?<div style=\'height:15px;\'></div>((\w|\W)*)'
-                    , chapter_content)
-                if first_character_re:
-                    chapter_content = first_character_re.group(2) + first_character_re.group(4)
+                    chapter_content = content_soup.prettify()
 
                 # Add chapter title to chapter_content
                 if chapter_title and chapter_content:
@@ -185,6 +191,9 @@ class Crawler:
                 chapter.set_book_author(book_author)
             if book_thumb:
                 chapter.set_book_thumb(book_thumb)
+            if upper_char:
+                chapter.set_upper_char(upper_char)
+
             log.info("Crawler chapter: %s", chapter_title)
 
             return chapter
