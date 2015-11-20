@@ -42,6 +42,8 @@ class Burner:
             epub_book.add_item(epub.EpubNav())
             epub_book.spine.append('nav')
 
+            # get chapter content( text + img)
+            upper_character_list = []
             for chapter in self.book.chapters:
                 epub_chapter = epub.EpubHtml(uid='chap_' + str(chapter_order), title=chapter.title,
                                              file_name='chap_' + str(chapter_order) + '.xhtml',
@@ -52,8 +54,7 @@ class Burner:
                 epub_book.spine.append(epub_chapter)
                 chapter_order += 1
 
-                # add upper character
-                upper_character_list = []
+                # add upper character img
                 if chapter.upper_character:
                     if chapter.upper_character not in upper_character_list:
                         upper_character_list.append(chapter.upper_character)
