@@ -53,18 +53,21 @@ class Burner:
                 chapter_order += 1
 
                 # add upper character
+                upper_character_list = []
                 if chapter.upper_character:
-                    try:
-                        rs = requests.get(UPPER_CHAR_URL + chapter.upper_character, stream=True)
+                    if chapter.upper_character not in upper_character_list:
+                        upper_character_list.append(chapter.upper_character)
+                        try:
+                            rs = requests.get(UPPER_CHAR_URL + chapter.upper_character, stream=True)
 
-                        upper_char_img = epub.EpubItem(uid=chapter.upper_character,
-                                                       file_name=UPPER_CHAR_PATH + chapter.upper_character,
-                                                       content=rs.content)
-                        # add upper character to book
-                        epub_book.add_item(upper_char_img)
-                        log.info("Add upper character img: " + chapter.upper_character)
-                    except requests.exceptions.ConnectionError:
-                        log.error("Can't download upper char image from %s", chapter.upper_character)
+                            upper_char_img = epub.EpubItem(uid=chapter.upper_character,
+                                                           file_name=UPPER_CHAR_PATH + chapter.upper_character,
+                                                           content=rs.content)
+                            # add upper character to book
+                            epub_book.add_item(upper_char_img)
+                            log.info("Add upper character img: " + chapter.upper_character)
+                        except requests.exceptions.ConnectionError:
+                            log.error("Can't download upper char image from %s", chapter.upper_character)
 
             # define CSS style
             style = 'BODY {color: white;}'

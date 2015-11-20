@@ -8,6 +8,7 @@ class Chapter:
 
     title = None
     content = None
+    upper_character = None
 
     def __init__(self, title=None, content=None):
         if title:
@@ -29,3 +30,6 @@ class Chapter:
 
     def set_content(self, content):
         self.content = content
+
+    def set_upper_char(self, char):
+        self.upper_character = char
